@@ -12,15 +12,13 @@ public class Graph {
 		g = new int[n][n];
 		edges = new int[size];
 		for(int i =0; i <size; i++) {
-			edges[i] = -1;
+			edges[i] = 0;
 		}
 	}
-	
 	
 	public int getSize() {
 		return size;
 	}
-	
 	
 	public int getTotalEdges() {
 		return totalEdges;

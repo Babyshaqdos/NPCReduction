@@ -5,14 +5,15 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class SolveClique {
-	private Graph[] arrayGraph = new Graph[51];
+public class SolveISet {
+	
+	private static SolveClique solve=new SolveClique();
+	private Graph[] arrayGraph = new Graph[1000];
 	private Graph graph;
 	private int arrayCount = 0;
-	private int graphCount = 0;
-
-
-	//Function to read the text file and build the graph, will also call the findClique for each member of arrayGraph
+	private int graphCount=0;
+	
+	//read graph from input fileName
 	public void readGraph() {
 		String filename;
 		int rowCounter = -1;
@@ -20,6 +21,7 @@ public class SolveClique {
 		System.out.println("Please enter the name of the text file for the graph to be read: ");
 		Scanner input = new Scanner(System.in);
 		filename = input.nextLine();
+		System.out.println("* Max Independent Sets in graphs in" + filename +": (reduced to K-Clique) *");
 		try {
 			input = new Scanner(new File(filename));
 			while(input.hasNextLine()) {
@@ -58,60 +60,52 @@ public class SolveClique {
 			}
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+
 			System.out.println("File was not found");
 			e.printStackTrace();
 		}
+		//changes all graphs to be the compliment
+		findCompliment();
+		
 		
 		//Calls the findClique function on every graph in the arrayGraph array
 		for(int g = 1; g<arrayCount; g++) {
 			graph = arrayGraph[g];
 			ArrayList<Integer> tempClique = new ArrayList<Integer>();
-			tempClique = findClique(tempClique, 0, graph.getSize(), graph);
+			tempClique = solve.findClique(tempClique, 0, graph.getSize(), graph);
 			print(tempClique, graph);
 		}
 		
 	}
 	
-	
-
-	//Function that takes an arraylist as the clique, the starting row position, the length of the clique and a graph to find the maximum clique
-	public ArrayList<Integer> findClique(ArrayList<Integer> clique, int row, int length, Graph g){
-		//2 new ArrayLists, one to hold the max clique and another to handle recursive calls
-		ArrayList<Integer> newClique = new ArrayList<Integer>();
-		ArrayList<Integer> maxClique = new ArrayList<Integer>();
-		maxClique = clique;
-		for(int i = row; i < g.getSize(); i++) {
-			boolean flag = true;
-			for(int j = 0; j< clique.size(); j++) {
-				if(g.get(clique.get(j), i) != 1) {
-					flag = false;
-				}
-			}
-			if(flag) {
-				//Create another new arraylist to hold the passed in clique list to in turn be passed back recursively after adding a node
-				ArrayList<Integer> tempClique = new ArrayList<Integer>(clique);
-				//tempClique = clique;
-				if(!tempClique.contains(i)) {
-					tempClique.add(i);
-				}
-				newClique = findClique(tempClique, i + 1, length, g);
-				if(newClique.size() > maxClique.size()) {
-					maxClique = newClique;
+	private void findCompliment() {
+		
+		//for every graph in arrayGraph
+		for(int i=1; i<arrayCount; i++) {
+			graph = arrayGraph[i];
+			//for every row in current graph
+			for(int j = 0; j < graph.getSize(); j++) {
+				//for every column
+				for(int k = 0; k<graph.getSize();k++) {
+					//switch value at every cord in adj matrix except diagonal
+					if(j != k) {
+						if(graph.get(j, k) == 1) {
+							arrayGraph[i].add(j, k, 0);
+						}
+						else {
+							arrayGraph[i].add(j, k, 1);
+						}
+					}
 				}
 			}
 		}
-		return maxClique;
 	}
-
-
-
-	//Function that takes a copy of the graph and the clique and outputs the solution
+	
+	//prints the independent sets
     private void print(ArrayList<Integer> clique, Graph g) {
         int size = clique.size();
 
-        System.out.println("G" + graphCount++ + " (" + g.getSize() + ", " + g.getTotalEdges() + ") " + clique.toString() + "(size=" + size + ")");
+        System.out.println("G" + ++graphCount + " (" + g.getSize() + ", " + g.getTotalEdges() + ") " + clique.toString() + "(size=" + size + ")");
     }
-
 
 }
